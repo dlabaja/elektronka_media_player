@@ -4,7 +4,7 @@ use eventual::Timer;
 use std::io::{stdout, Write};
 use std::path::Path;
 use image::{AnimationDecoder, Frame};
-use std::process::{Command};
+use std::process::{Command, ExitStatus};
 use crossterm::{cursor, queue, QueueableCommand, style, terminal};
 use crossterm::style::{Color, Print};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
@@ -30,12 +30,12 @@ fn main() {
     //convert video
     println!("Converting video");
     let video = &format!("{}{}output.gif", dirs::cache_dir().unwrap().display(), get_system_backslash());
-    Command::new("ffmpeg").args(["-i", path, "-vf", "scale=80:45,fps=20", &Path::new(&video).display().to_string(), "-y"]).output().expect("Unable to convert to gif");
+    Command::new("ffmpeg").args(["-i", path, "-vf", "scale=80:45,fps=20", &Path::new(&video).display().to_string(), "-y"]).spawn().expect("Unable to convert to gif").wait().unwrap();
 
     //convert audio
     println!("Converting audio");
     let audio = &format!("{}{}output.mp3", dirs::cache_dir().unwrap().display(), get_system_backslash());
-    Command::new("ffmpeg").args(["-i", &Path::new(&path).display().to_string(), &format!("{}", Path::new(audio).display()), "-y"]).output().expect("Unable to convert audio");
+    Command::new("ffmpeg").args(["-i", &Path::new(&path).display().to_string(), &format!("{}", Path::new(audio).display()), "-y"]).spawn().expect("Unable to convert audio").wait().unwrap();
 
     //switch to alternate screen and modify cursor
     enable_raw_mode().unwrap();
